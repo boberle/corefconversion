@@ -42,10 +42,10 @@ from stanfordnlp.models.common.conll import CoNLLFile
 #stanfordnlp.download('fr')
 
 
-def tokenize(fpath):
+def tokenize(fpath, lang):
     content = open(fpath).read()
     doc = stanfordnlp.Document(content)
-    nlp = stanfordnlp.Pipeline(lang='fr', processors="tokenize,mwt")
+    nlp = stanfordnlp.Pipeline(lang=lang, processors="tokenize,mwt")
     doc = nlp(doc)
     #print(doc.conll_file.conll_as_string())
     #print(doc.conll_file.sents)
@@ -92,6 +92,8 @@ def parse_args():
        help="export conll and not jsonlines (for debugging)")
     parser.add_argument("--genre", dest="genre", default="ge",
         help="genre (default is 'ge')")
+    parser.add_argument("--lang", dest="lang", default="en",
+        help="lang: en, fr, etc. (default is 'en')")
     parser.add_argument("-o", dest="outfpath", required=False,
         default=None, help="output file (default to stdout)")
     # reading
@@ -102,7 +104,7 @@ def parse_args():
 
 def main():
     args = parse_args()
-    sents = tokenize(args.infpath)
+    sents = tokenize(args.infpath, lang=args.lang)
     if args.export_conll:
         code = make_conll(sents, fpath=args.infpath, genre=args.genre)
     else:
