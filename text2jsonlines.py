@@ -8,6 +8,8 @@ several texts (a corpus).  Each line is a valid json document, as follows:
                     ["This", "is", "the", "second", "."]],
       "speakers":  [["spk1", "spk1", "spk1", "spk1", "spk1", "spk1"],
                     ["spk2", "spk2", "spk2", "spk2", "spk2"]]
+      "pos":       [["DET", "V", "DET", "ADJ", "NOUN", "PUNCT"],
+                    ["DET", "V", "DET", "ADJ", "PUNCT"]],
     }
 
 It is used for some coreference resolution systems, such as:
@@ -34,6 +36,7 @@ Notes:
 
 import argparse
 import json
+import re
 
 import stanfordnlp
 from stanfordnlp.models.common.conll import CoNLLFile
@@ -43,26 +46,46 @@ from stanfordnlp.models.common.conll import CoNLLFile
 
 
 def tokenize(fpath, lang):
+
     content = open(fpath).read()
-    doc = stanfordnlp.Document(content)
-    nlp = stanfordnlp.Pipeline(lang=lang, processors="tokenize,mwt")
-    doc = nlp(doc)
-    #print(doc.conll_file.conll_as_string())
-    #print(doc.conll_file.sents)
-    sents = [
-        [ token[1] for token in sent if '-' not in token[0] ]
-        for sent in doc.conll_file.sents
-    ]
-    return sents
+    paragraphs = re.split(r'\n+', content)
+    res_sents = []
+    res_pars = []
+    res_pos = []
+    start_par = 0
+    for par in paragraphs:
+        par = par.strip()
+        if not par:
+            continue
+        doc = stanfordnlp.Document(par)
+        nlp = stanfordnlp.Pipeline(lang=lang, processors="tokenize,mwt,pos")
+        doc = nlp(doc)
+        #print(doc.conll_file.conll_as_string())
+        #print(doc.conll_file.sents)
+        sents = [
+            [ token[1] for token in sent if '-' not in token[0] ]
+            for sent in doc.conll_file.sents
+        ]
+        pos = [
+            [ token[3] for token in sent if '-' not in token[0] ]
+            for sent in doc.conll_file.sents
+        ]
+        res_sents.extend(sents)
+        res_pos.extend(pos)
+        length = sum((len(s) for s in sents))
+        res_pars.append([start_par, start_par+length-1])
+        start_par = start_par+length
+    return res_sents, res_pos, res_pars
 
 
-
-def make_jsonlines(sents, fpath, genre):
+def make_jsonlines(sents, pos, pars, fpath, genre):
     doc = dict(
         doc_key = f"{genre[:2]}:{fpath}",
         sentences = sents,
         speakers = [ [ "_" for tok in sent ] for sent in sents ],
         clusters = [],
+        pos = pos,
+        paragraphs = pars,
     )
     return json.dumps(doc)
 
@@ -104,11 +127,12 @@ def parse_args():
 
 def main():
     args = parse_args()
-    sents = tokenize(args.infpath, lang=args.lang)
+    sents, pos, pars = tokenize(args.infpath, lang=args.lang)
     if args.export_conll:
         code = make_conll(sents, fpath=args.infpath, genre=args.genre)
     else:
-        code = make_jsonlines(sents, fpath=args.infpath, genre=args.genre)
+        code = make_jsonlines(sents, pos, pars,
+            fpath=args.infpath, genre=args.genre)
     if args.outfpath:
         open(args.outfpath, 'w').write(code + "\n")
     else:
