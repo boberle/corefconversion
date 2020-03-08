@@ -279,7 +279,7 @@ Here is an example:
 6             l'             le     DET
 7          Homme          homme    NOUN
 ...
-#endocument
+#end document
 ```
 
 Column separator (spaces or tabulation), number and content vary according to specification (CoNLL-2012, CoNLL-U, CoNLL-X, etc.).
