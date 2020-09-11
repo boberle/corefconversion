@@ -7,10 +7,6 @@ import re
 from collections import OrderedDict
 from warnings import warn
 
-import numpy as np
-import scipy.optimize
-
-
 START_DOC_PATTERN = re.compile(
     #r'#begin document \((.+?)\)(?:; part (\d+))?.*' + '\n')
     r'#begin document (.*?)' + '\n')

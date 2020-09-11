@@ -186,6 +186,106 @@ Output sample:
 }
 ```
 
+## The `sacr2conll.py` script
+
+Script to convert from the [SACR](https://boberle.com/projects/coreference-annotation-with-sacr/) format to a CONLL-2012-like format.  Note that the CONLL format which is produced:
+
+- contains 3 columns (not all the columns of the original CONLL-2012 format):
+   - index
+   - form
+   - coreference
+- is tabulation separated (like CONLL-X, while the original CONLL-2012 format is space separated).
+
+Here is the command to convert the SACR files in the `testing` directory:
+
+```bash
+python3 sacr2conll.py -o testing/testing_sacr2conll.conll testing/*.sacr
+```
+
+This will produce a `testing/testing_sacr2conll.conll` file which contains all the input files specified on the command line converted into a CONLL-like format.
+
+Here is an extract:
+
+```
+#begin document (aesop.sacr); part 000
+0	A	(0
+1	Peasant	0)
+2	found	-
+3	an	(1
+4	Eagle	-
+5	captured	-
+6	in	-
+7	a	(2
+8	trap	2)_1)
+...
+#end document
+
+
+#begin document (ceasar.sacr); part 000
+0	Gaius	(0
+1	Julius	-
+2	Caesar	0)
+3	(	-
+4	12	(1
+5	or	-
+6	13	-
+7	July	-
+8	100	-
+9	BC	1)
+10	–	-
+11	15	(2
+12	March	-
+13	44	-
+14	BC	2)
+15	)	-
+16	,	-
+17	known	-
+18	by	-
+19	his	(3_(4_(0)
+20	nomen	4)
+21	and	-
+22	cognomen	(5)
+23	Julius	-
+24	Caesar	3)
+...
+```
+
+Please refer to the `-h` option for a complete list of options.
+
+
+## The `conll2sacr.py` script
+
+The opposite of `sacr2conll.py`.  It converts a CONLL-2012 or CONLL-X file into a [SACR](https://boberle.com/projects/coreference-annotation-with-sacr/) file.
+
+The script take an output directory as parameter: all documents in the CONLL file will be output as a different file in this directory.
+
+Here is the command to convert back the SACR files converted to CONLL in the previous section:
+
+```
+python3 conll2sacr.py \
+   --output-dir testing_conll2sacr \
+   --tab \
+   --token-col 1 \
+   testing/testing_sacr2conll.conll
+```
+
+Note the `--tab` option (because here the CONLL file is tab separated) and the `--token-col` option which indicates that the tokens are to be found in the second column (index starts at 0).
+
+If you were to parse a real CONLL-2012 (the original format), you would have to drop the `--tab` option (because the original format is space (not tab) spearated) and the `--token-col` option (or set it to 3, which is the default).
+
+The command produced a series of files in the `testing_conll2sacr` directory:
+
+```
+_aesop.sacr___part_000
+_ceasar.sacr___part_000
+_cicero.sacr___part_000
+_pliny.sacr___part_000
+_simple.sacr___part_000
+```
+
+Note that special characters (here the parentheses and spaces) have been replaced by underscores.
+
+Please refer to the `-h` option for a complete list of options.
 
 
 ## `text2jsonlines.py`
