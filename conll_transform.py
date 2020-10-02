@@ -85,7 +85,8 @@ def read_file(fpath, sep=None, ignore_double_indices=False,
                 sentences.append([])
             new_sentence = False
             split = line[:-1].split(sep)
-            if ignore_double_indices and "-" in split[0]:
+            if isinstance(ignore_double_indices, int) and \
+                    ignore_double_indices >= 0 and "-" in split[ignore_double_indices]:
                 continue
             sentences[-1].append(split)
     return docs
