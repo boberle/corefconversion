@@ -48,11 +48,7 @@ Note that spaces are not yielded as token.
 
 __version__ = "1.0.0"
 
-import argparse
 import re
-import os
-
-import pandas as pd
 
 WORD_TOKENIZATION = 1
 CHAR_TOKENIZATION = 2

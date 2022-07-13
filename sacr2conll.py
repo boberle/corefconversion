@@ -8,7 +8,25 @@ To convert:
     python3 sacr2conll.py -o OUTPUT.conll INPUT.sacr
 
 You can specify the document name (or key) with the `--docname` option.
-Otheriwse it will be `#textid`, if any, otherwise the file name.
+Otherwise, it will be `#textid`, if any, otherwise the file name.
+
+With the --speaker switch, you can add a 4th column, which will be placed
+before the coreference columns.  In the SACR file, the speaker can be mentionned
+as a comment prefixed with `#speaker:` before each line, like this:
+
+    #title: Lucian, Dialogues of the Dead, 4: Hermes and Charon
+
+    #speaker: Hermes
+    Ferryman, what do you say to settling up accounts? It will prevent any
+    unpleasantness later on.
+
+    #speaker: Charon
+    Very good. It does save trouble to get these things straight.
+
+You can remove the speaker for a paragraph by setting:
+
+    #speaker:
+    ... the text of the narrator ...
 """
 
 
@@ -21,7 +39,7 @@ import sacr_parser
 __version__ = "1.0.0"
 
 
-def read_file(fpath, index, docname=None, part_is_index=True):
+def read_file(fpath, index, docname=None, part_is_index=True, include_speaker=False):
 
     parser = sacr_parser.SacrParser(
         fpath=fpath,
@@ -36,6 +54,7 @@ def read_file(fpath, index, docname=None, part_is_index=True):
     filo = []
 
     textid = None
+    speaker = ""
 
     for item, params in parser.parse():
 
@@ -54,6 +73,10 @@ def read_file(fpath, index, docname=None, part_is_index=True):
             starts[l].append(chain)
             filo.append(chain)
 
+        elif item == "comment":
+            if params.startswith("speaker:"):
+                speaker = params[8:].strip().replace(" ", "_")
+
         elif item == "mention_end":
             chain = filo.pop()
             l = len(tokens) - 1
@@ -62,12 +85,12 @@ def read_file(fpath, index, docname=None, part_is_index=True):
             ends[l].append(chain)
 
         elif item == "token":
-            tokens.append(params)
+            tokens.append((params, speaker))
 
     lines = []
 
     counter = 0
-    for i, token in enumerate(tokens):
+    for i, (token, speaker) in enumerate(tokens):
         if i in sentences:
             lines.append("")
             counter = 0
@@ -81,7 +104,10 @@ def read_file(fpath, index, docname=None, part_is_index=True):
         corefcol = re.sub(r"\((\d+)_\1\)", r"(\1)", corefcol)
         if not corefcol:
             corefcol = "-"
-        cols = [str(counter), token, corefcol]
+        if include_speaker:
+            cols = [str(counter), token, speaker, corefcol]
+        else:
+            cols = [str(counter), token, corefcol]
         lines.append("\t".join(cols))
         counter += 1
 
@@ -123,6 +149,13 @@ def parse_args():
         help="document part is file index (otherwise the part is 0; "
         "this is implied by --docname",
     )
+    parser.add_argument(
+        "-s",
+        "--speaker",
+        default=False,
+        action="store_true",
+        help="include a column 'speaker' before the coref column",
+    )
     # special options
     parser.add_argument(
         "--version", action="version", version="%(prog)s " + __version__
@@ -141,7 +174,7 @@ def main():
     for i, fpath in enumerate(args.infpaths):
         res.append(
             read_file(
-                fpath, index=i, docname=args.docname, part_is_index=args.part_is_index
+                fpath, index=i, docname=args.docname, part_is_index=args.part_is_index, include_speaker=args.speaker
             )
         )
     res = "\n\n".join(res)

@@ -253,6 +253,62 @@ Here is an extract:
 Please refer to the `-h` option for a complete list of options.
 
 
+With the `--speaker` switch, you can add a 4th column, which will be placed before the coreference columns.  In the SACR file, the speaker can be mentionned as a comment prefixed with `#speaker:` before each line, like this:
+
+    #title: Lucian, Dialogues of the Dead, 4: Hermes and Charon
+
+    #speaker: Hermes
+    Ferryman, what do you say to settling up accounts? It will prevent any
+    unpleasantness later on.
+
+    #speaker: Charon
+    Very good. It does save trouble to get these things straight.
+
+This will produce a CoNLL file like this:
+
+```
+#begin document (lucian_speakers.sacr); part 000
+0	Ferryman	Hermes	-
+1	,	Hermes	-
+2	what	Hermes	-
+3	do	Hermes	-
+4	you	Hermes	-
+5	say	Hermes	-
+6	to	Hermes	-
+7	settling	Hermes	-
+8	up	Hermes	-
+9	accounts	Hermes	-
+10	?	Hermes	-
+
+0	It	Hermes	-
+1	will	Hermes	-
+2	prevent	Hermes	-
+3	any	Hermes	-
+4	unpleasantness	Hermes	-
+5	later	Hermes	-
+6	on	Hermes	-
+7	.	Hermes	-
+
+0	Very	Charon	-
+1	good	Charon	-
+2	.	Charon	-
+```
+
+You can remove the speaker for a paragraph by setting:
+
+    #speaker:
+    ... the text of the narrator ...
+
+A test file is available in `testing/lucian_speakers.sacr`.
+
+To convert a SACR file to a jsonline file, you will need to run these two commands:
+
+```bash
+python3 sacr2conll.py -s -o /tmp/lucian_speakers.conll testing/lucian_speakers.sacr
+python3 conll2jsonlines.py --token-col 1 --speaker-col 2 /tmp/lucian_speakers.conll /tmp/lucian_speakers.jsonlines
+```
+
+
 ## The `conll2sacr.py` script
 
 The opposite of `sacr2conll.py`.  It converts a CONLL-2012 or CONLL-X file into a [SACR](https://boberle.com/projects/coreference-annotation-with-sacr/) file.
@@ -411,4 +467,3 @@ It is used for some coreference resolution systems, such as:
 ## License
 
 All the scripts are distributed under the terms of the Mozilla Public Licence 2.0.
-
