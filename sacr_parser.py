@@ -46,7 +46,7 @@ Note that spaces are not yielded as token.
                 ...
 """
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"
 
 import argparse
 import re
@@ -57,15 +57,16 @@ import pandas as pd
 WORD_TOKENIZATION = 1
 CHAR_TOKENIZATION = 2
 
+
 def escape_regex(string):
     """Escape a string so it can be literally search for in a regex.
 
     Used for additional_tokens.
     """
-    return re.sub(r'([-{}\[\]().])', r'\\\1', string)
+    return re.sub(r"([-{}\[\]().])", r"\\\1", string)
 
 
-class SacrParser():
+class SacrParser:
     """Parse a file in the SACR format.
 
     Attribute
@@ -82,13 +83,14 @@ class SacrParser():
         """Compute the regex to match words, including additional_tokens."""
         if not additional_tokens:
             addtional_words = []
-        additional_tokens = sorted([escape_regex(w) for w in
-            additional_tokens], key=lambda x: len(x))
-        token_str = \
-            "[a-zßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿœα-ω0-9_]+'?|[-+±]?[.,]?[0-9]+"
+        additional_tokens = sorted(
+            [escape_regex(w) for w in additional_tokens], key=lambda x: len(x)
+        )
+        token_str = "[a-zßàáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿœα-ω0-9_]+'?|[-+±]?[.,]?[0-9]+"
         if additional_tokens:
-            return re.compile("([%d]+|%s)" % (token_str,
-                "|".join(additional_tokens)), re.I)
+            return re.compile(
+                "([%d]+|%s)" % (token_str, "|".join(additional_tokens)), re.I
+            )
         else:
             return re.compile("(%s)" % token_str, re.I)
 
@@ -104,73 +106,71 @@ class SacrParser():
         chains = dict()
         open_mention_counter = 0
         # patterns:
-        additional_tokens_pattern \
-            = re.compile(r'#additional_?token:\s*(.+)\s*\n\n+')
-        text_id_pattern \
-            = re.compile(r'#text_?id:\s*(.+)\s*\n\n*')
-        comment_pattern = re.compile(r'(?:#(.*)\n+|\*{5,})')
-        end_par_pattern = re.compile(r'\n\n+')
-        space_pattern = re.compile(r'\s+')
-        new_line_pattern = re.compile(r'\n')
-        open_mention_pattern = re.compile(r'\{(\w+)(:| )')
+        additional_tokens_pattern = re.compile(r"#additional_?token:\s*(.+)\s*\n\n+")
+        text_id_pattern = re.compile(r"#text_?id:\s*(.+)\s*\n\n*")
+        comment_pattern = re.compile(r"(?:#(.*)\n+|\*{5,})")
+        end_par_pattern = re.compile(r"\n\n+")
+        space_pattern = re.compile(r"\s+")
+        new_line_pattern = re.compile(r"\n")
+        open_mention_pattern = re.compile(r"\{(\w+)(:| )")
         feature_pattern = re.compile(r'(\w+)=(?:(\w+)|"([^"]*)")(,| )')
-        close_mention_pattern = re.compile(r'\}')
+        close_mention_pattern = re.compile(r"\}")
         sentence_end_pattern = re.compile(r'(?:\.+"?|\!|\?)')
         if self.tokenization_mode == WORD_TOKENIZATION:
             word_pattern = self.__class__.get_word_regex(additional_tokens)
         else:
-            word_pattern = re.compile(r'.')
+            word_pattern = re.compile(r".")
         # eat leading blank lines
-        m = re.compile(r'\s+').match(content, pos)
+        m = re.compile(r"\s+").match(content, pos)
         if m:
-            #print('eat leading spaces')
+            # print('eat leading spaces')
             pos += len(m.group(0))
         while pos < len(content):
             m = additional_tokens_pattern.match(content, pos)
             if m:
-                #print('add word')
+                # print('add word')
                 pos += len(m.group(0))
                 additional_tokens.append(m.group(1))
                 word_regex = SacrParser.get_word_regex(additional_tokens)
                 continue
             m = text_id_pattern.match(content, pos)
             if m:
-                #print('textid')
+                # print('textid')
                 pos += len(m.group(0))
-                yield 'text_id', m.group(1)
+                yield "text_id", m.group(1)
                 continue
             m = comment_pattern.match(content, pos)
             if m:
-                #print('comment', m.group(0))
+                # print('comment', m.group(0))
                 pos += len(m.group(0))
                 comment = m.group(1).strip()
                 if comment:
-                    yield 'comment', comment
+                    yield "comment", comment
                 continue
             # paragraph of text
-            yield 'par_start', None
+            yield "par_start", None
             while pos < len(content):
-                #print("%d, %d" % (pos, len(content)))
-                #print(content[pos])
+                # print("%d, %d" % (pos, len(content)))
+                # print(content[pos])
                 m = end_par_pattern.match(content, pos)
                 if m:
-                    #print('end par')
+                    # print('end par')
                     pos += len(m.group(0))
-                    yield 'par_end', None
+                    yield "par_end", None
                     break
                 m = space_pattern.match(content, pos)
                 if m:
-                    #print('space')
+                    # print('space')
                     pos += len(m.group(0))
                     continue
                 m = new_line_pattern.match(content, pos)
                 if m:
-                    #print('newline')
+                    # print('newline')
                     pos += len(m.group(0))
                     continue
                 m = open_mention_pattern.match(content, pos)
                 if m:
-                    #print('mention')
+                    # print('mention')
                     pos += len(m.group(0))
                     open_mention_counter += 1
                     if m.group(1) not in chains:
@@ -178,50 +178,47 @@ class SacrParser():
                     chain_index = chains[m.group(1)]
                     chain_name = m.group(1)
                     features = dict()
-                    if m.group(2) == ':':
+                    if m.group(2) == ":":
                         while pos < len(content):
                             m = feature_pattern.match(content, pos)
                             if m:
                                 key = m.group(1)
-                                value = m.group(2) \
-                                    if m.group(2) != None else m.group(3)
+                                value = m.group(2) if m.group(2) != None else m.group(3)
                                 features[key] = value
                                 pos += len(m.group(0))
-                                if m.group(4) == ' ':
+                                if m.group(4) == " ":
                                     break
                             else:
                                 raise SyntaxError(
-                                    "can't understand '%s' near %d"
-                                    % (content, pos))
-                    yield 'mention_start', (chain_index, chain_name, features)
+                                    "can't understand '%s' near %d" % (content, pos)
+                                )
+                    yield "mention_start", (chain_index, chain_name, features)
                     continue
                 m = close_mention_pattern.match(content, pos)
                 if m:
-                    #print('end mention')
+                    # print('end mention')
                     pos += len(m.group(0))
                     open_mention_counter -= 1
-                    yield 'mention_end', None
+                    yield "mention_end", None
                     continue
                 m = word_pattern.match(content, pos)
                 if m:
-                    #print('token: %s' % m.group(0))
+                    # print('token: %s' % m.group(0))
                     pos += len(m.group(0))
-                    yield 'token', m.group(0)
+                    yield "token", m.group(0)
                     continue
                 if open_mention_counter == 0:
                     m = sentence_end_pattern.match(content, pos)
                     if m:
-                        #print('token: %s' % m.group(0))
+                        # print('token: %s' % m.group(0))
                         pos += len(m.group(0))
-                        yield 'token', m.group(0)
-                        yield 'sentence_change', None
+                        yield "token", m.group(0)
+                        yield "sentence_change", None
                         continue
-                m = re.compile(r'.').match(content, pos)
+                m = re.compile(r".").match(content, pos)
                 if m:
-                    #print('token: %s' % m.group(0))
+                    # print('token: %s' % m.group(0))
                     pos += len(m.group(0))
-                    yield 'token', m.group(0)
-                    continue 
+                    yield "token", m.group(0)
+                    continue
                 assert False
-
-
