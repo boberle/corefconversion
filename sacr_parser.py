@@ -78,7 +78,7 @@ class SacrParser:
     def get_word_regex(additional_tokens=None):
         """Compute the regex to match words, including additional_tokens."""
         if not additional_tokens:
-            addtional_words = []
+            addtional_tokens = []
         additional_tokens = sorted(
             [escape_regex(w) for w in additional_tokens], key=lambda x: len(x)
         )
@@ -127,7 +127,7 @@ class SacrParser:
                 # print('add word')
                 pos += len(m.group(0))
                 additional_tokens.append(m.group(1))
-                word_regex = SacrParser.get_word_regex(additional_tokens)
+                word_pattern = SacrParser.get_word_regex(additional_tokens)
                 continue
             m = text_id_pattern.match(content, pos)
             if m:
@@ -179,7 +179,7 @@ class SacrParser:
                             m = feature_pattern.match(content, pos)
                             if m:
                                 key = m.group(1)
-                                value = m.group(2) if m.group(2) != None else m.group(3)
+                                value = m.group(2) if m.group(2) is not None else m.group(3)
                                 features[key] = value
                                 pos += len(m.group(0))
                                 if m.group(4) == " ":
