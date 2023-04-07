@@ -1,0 +1,7 @@
+[tool.isort]
+profile="black"
+skip_gitignore=true
+skip=["color_manager.py","conll2jsonlines.py","conll2sacr.py","conll_transform.py","jsonlines2conll.py","jsonlines2text.py","sacr2conll.py","sacr_parser.py","text2jsonlines.py","standoff2inline.py"]
+
+[tool.black]
+extend-exclude='(color_manager|conll2jsonlines|conll2sacr|conll_transform|jsonlines2conll|jsonlines2text|sacr2conll|sacr_parser|text2jsonlines|standoff2inline).py'
