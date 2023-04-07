@@ -3,7 +3,6 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from pathlib import Path
-
 from typing import Generator
 
 
@@ -164,9 +163,10 @@ class SacrParser:
 
             if m := comment_pattern.match(content, pos):
                 length = len(m.group(0))
-                comment = m.group(1).strip()
-                if comment:
-                    yield Comment(pos, pos + length, comment)
+                if m.group(1):  # no group 0 if ******
+                    comment = m.group(1).strip()
+                    if comment:
+                        yield Comment(pos, pos + length, comment)
                 pos += length
                 continue
 
