@@ -2,7 +2,7 @@ from zipfile import ZipFile
 
 import pytest
 
-from annotable import Corpus, Mention, Paragraph, Sentence, Text, Token
+from annotable import Corpus, EmptyDataSet, Mention, Paragraph, Sentence, Text, Token
 
 
 @pytest.fixture
@@ -625,3 +625,109 @@ def test_zipfile(corpus1: Corpus) -> None:
         "1,my text,11,3,2,3,2\n"
     )
 
+
+def test_text_metadata__no_metadata() -> None:
+    corpus = Corpus(
+        _texts=[
+            Text(),
+            Text(),
+            Text(),
+        ]
+    )
+    texts = list(corpus.iter_texts_as_dict())
+    expected = [
+        "id",
+        "name",
+        "token_count",
+        "sentence_count",
+        "paragraph_count",
+        "mention_count",
+        "chain_count",
+    ]
+    assert list(texts[0].keys()) == expected
+    assert list(texts[1].keys()) == expected
+    assert list(texts[2].keys()) == expected
+
+
+def test_text_metadata__1_text_with_metadata() -> None:
+    corpus = Corpus(
+        _texts=[
+            Text(metadata=dict(a="1", b=2)),
+            Text(),
+            Text(),
+        ]
+    )
+    texts = list(corpus.iter_texts_as_dict())
+    expected = [
+        "id",
+        "name",
+        "token_count",
+        "sentence_count",
+        "paragraph_count",
+        "mention_count",
+        "chain_count",
+    ]
+    assert list(texts[0].keys()) == expected + ["a", "b"]
+    assert list(texts[1].keys()) == expected
+    assert list(texts[2].keys()) == expected
+
+    assert texts[0]["a"] == "1"
+    assert texts[0]["b"] == 2
+
+
+def test_text_metadata__2_texts_with_metadata() -> None:
+    corpus = Corpus(
+        _texts=[
+            Text(metadata=dict(a="1", b=2)),
+            Text(),
+            Text(metadata=dict(A="3", B=4)),
+        ]
+    )
+    texts = list(corpus.iter_texts_as_dict())
+    expected = [
+        "id",
+        "name",
+        "token_count",
+        "sentence_count",
+        "paragraph_count",
+        "mention_count",
+        "chain_count",
+    ]
+    assert list(texts[0].keys()) == expected + ["a", "b"]
+    assert list(texts[1].keys()) == expected
+    assert list(texts[2].keys()) == expected + ["A", "B"]
+
+    assert texts[0]["a"] == "1"
+    assert texts[0]["b"] == 2
+    assert texts[2]["A"] == "3"
+    assert texts[2]["B"] == 4
+
+
+def test_empty_dataset() -> None:
+    corpus = Corpus(
+        _texts=[
+            Text(),
+            Text(),
+            Text(),
+        ]
+    )
+    with pytest.raises(EmptyDataSet):
+        corpus.get_dataframes()
+
+
+def test_text_metadata_in_dataframe__2_texts_with_metadata(corpus1: Corpus) -> None:
+    corpus1._texts[0].metadata = dict(a="1", b=2)
+    corpus1._texts[1].metadata = dict(A="3", B=4)
+    dfs = corpus1.get_dataframes()
+    assert list(dfs.texts.columns) == [
+        "name",
+        "token_count",
+        "sentence_count",
+        "paragraph_count",
+        "mention_count",
+        "chain_count",
+        "a",
+        "b",
+        "A",
+        "B",
+    ]

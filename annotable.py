@@ -183,6 +183,7 @@ class Paragraph(Annotable):
 @dataclass
 class Text(Annotable):
     name: str | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
     _paragraphs: list[Paragraph] = field(default_factory=list)
 
     @property
@@ -261,6 +262,10 @@ class DataFrameSet:
     text_chains: pd.DataFrame
     text_to_first_relations: pd.DataFrame
     text_consecutive_relations: pd.DataFrame
+
+
+class EmptyDataSet(Exception):
+    pass
 
 
 @dataclass
@@ -352,7 +357,7 @@ class Corpus(Annotable):
 
     def iter_texts_as_dict(self) -> Generator[dict[str, Any], None, None]:
         for i, text in enumerate(self._texts):
-            yield dict(
+            data = dict(
                 id=i,
                 name=text.name,
                 token_count=text.token_count,
@@ -361,6 +366,9 @@ class Corpus(Annotable):
                 mention_count=text.mention_count,
                 chain_count=text.chain_count,
             )
+            for k, v in text.metadata.items():
+                data[k] = v
+            yield data
 
     def iter_paragraphs_as_dict(self) -> Generator[dict[str, Any], None, None]:
         paragraph_index = 0
@@ -608,24 +616,32 @@ class Corpus(Annotable):
                 chain_index += 1
 
     def get_dataframes(self) -> DataFrameSet:
-        def get_df(data: Iterable[dict[str, Any]]) -> pd.DataFrame:
-            index, dicts = zip(
-                *map(
-                    lambda d: (d["id"], {k: v for k, v in d.items() if k != "id"}), data
+        def get_df(data: Iterable[dict[str, Any]], name: str) -> pd.DataFrame:
+            try:
+                index, dicts = zip(
+                    *map(
+                        lambda d: (d["id"], {k: v for k, v in d.items() if k != "id"}),
+                        data,
+                    )
                 )
-            )
-            return pd.DataFrame(data=dicts, index=index)
+            except ValueError:
+                raise EmptyDataSet(f"Empty data set: '{name}'")
+            else:
+                return pd.DataFrame(data=dicts, index=index)
 
         return DataFrameSet(
-            texts=get_df(self.iter_texts_as_dict()),
-            paragraphs=get_df(self.iter_paragraphs_as_dict()),
-            sentences=get_df(self.iter_sentences_as_dict()),
-            tokens=get_df(self.iter_tokens_as_dict()),
-            text_mentions=get_df(self.iter_text_mentions_as_dict()),
-            text_chains=get_df(self.iter_text_chains_as_dict()),
-            text_to_first_relations=get_df(self.iter_text_to_first_relations_as_dict()),
+            texts=get_df(self.iter_texts_as_dict(), "texts"),
+            paragraphs=get_df(self.iter_paragraphs_as_dict(), "paragraphs"),
+            sentences=get_df(self.iter_sentences_as_dict(), "sentences"),
+            tokens=get_df(self.iter_tokens_as_dict(), "tokens"),
+            text_mentions=get_df(self.iter_text_mentions_as_dict(), "text_mentions"),
+            text_chains=get_df(self.iter_text_chains_as_dict(), "text_chains"),
+            text_to_first_relations=get_df(
+                self.iter_text_to_first_relations_as_dict(), "text_to_first_relations"
+            ),
             text_consecutive_relations=get_df(
-                self.iter_text_consecutive_relations_as_dict()
+                self.iter_text_consecutive_relations_as_dict(),
+                "text_consecutive_relations",
             ),
         )
 
