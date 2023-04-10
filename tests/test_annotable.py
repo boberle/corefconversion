@@ -68,7 +68,7 @@ def corpus1() -> Corpus:
                     ]),
                 ]),
             ],
-            name="my text",
+                name="my text",
             ),
         ]
     )
