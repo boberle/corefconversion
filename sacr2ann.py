@@ -166,7 +166,7 @@ def convert(
 
 def parse_args() -> Namespace:
     parser = argparse.ArgumentParser(
-        prog="sacr2add",
+        prog="sacr2ann",
         description="convert a sacr file to an ann/txt files (BRAT standoff annotations)",
         # description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
