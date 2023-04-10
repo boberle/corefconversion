@@ -119,14 +119,6 @@ class Sentence(Annotable):
     def add_token(self, token: Token) -> None:
         self._tokens.append(token)
 
-    @property
-    def chains(self) -> Generator[Chain, None, None]:
-        yield from _iter_chains(self._mentions)
-
-    @property
-    def chain_count(self) -> int:
-        return len(list(self.chains))
-
 
 @dataclass
 class Paragraph(Annotable):
@@ -152,14 +144,6 @@ class Paragraph(Annotable):
     @property
     def mention_count(self) -> int:
         return sum(sentence.mention_count for sentence in self._sentences)
-
-    @property
-    def chains(self) -> Generator[Chain, None, None]:
-        yield from _iter_chains(self.mentions)
-
-    @property
-    def chain_count(self) -> int:
-        return len(list(self.chains))
 
     @property
     def sentence_chains(self) -> Generator[Chain, None, None]:
@@ -310,14 +294,6 @@ class Corpus(Annotable):
     @property
     def mention_count(self) -> int:
         return sum(text.mention_count for text in self._texts)
-
-    @property
-    def chains(self) -> Generator[Chain, None, None]:
-        yield from _iter_chains(self.mentions)
-
-    @property
-    def chain_count(self) -> int:
-        return len(list(self.chains))
 
     @property
     def text_chains(self) -> Generator[Chain, None, None]:
