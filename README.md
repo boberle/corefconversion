@@ -411,6 +411,58 @@ Module containing several function to manipulate conll data:
 - `merge_amalgams`: Add amalgams in documents from where they have been removed.
 
 
+## Convert SACR file to Brat Standoff Annotation using `sacr2ann.py`
+
+The script `sacr2ann.py` will convert a SACR file to a set of 2 files used with BRAT:
+
+- a `.txt` file that holds the text (all comments found in the SACR file are ignored),
+- and a `.ann` file that holds the annotations.
+
+The format is described [here](https://brat.nlplab.org/standoff.html).
+
+Only a subset of the BRAT annotations is taken into account for now, namely the text-bound anntoations (with a leading `T`), and the relation annotations (with a leading `R`).
+
+The type of the text annotations is found in the `--type-property-name` of SACR annotations. This means that if your SACR schema holds a property `type` that contains the type of the annotation, and you want the type to be reflected in your BRAT annotation, then you would call `sacr2ann.py` with the option `--type-property-name type`.  If this option is not specify, or if a mention is missing, then the default type is `Mention`.
+
+The type of the relation annotation is `Coreference`.
+
+If you need more annotations from the BRAT format, don't hesitate to ask me by sending me message or opening an issue.
+
+Here is an example.
+
+Let's say you have the following SACR file `aesop.sacr`:
+
+```
+{Peasant:type="Person" A Peasant} found {Eagle:type="Animal" an Eagle captured in {M3:type="Object" a trap}},
+and much admiring {Eagle:type="Animal" the bird}, set {Peasant:type="Person" him} free.
+```
+
+Then running:
+
+```bash
+python3 sacr2ann.py --type-property-name type aesop.sacr
+```
+
+will produce 2 files, `aesop.sacr.txt` and `aesop.sacr.ann`. You can specify the output files with the `--txt` and `--ann` options.
+
+Here is the `.txt` file:
+
+```
+A Peasant found an Eagle captured in a trap,and much admiring the bird, set him free.
+```
+
+Here is the `.ann` file:
+
+```
+T1      Person 0 9      A Peasant
+T2      Animal 16 43    an Eagle captured in a trap
+T3      Object 37 43    a trap
+T4      Animal 62 70    the bird
+R1      Coreference Arg1:T2 Arg2:T4
+T5      Person 76 79    him
+R2      Coreference Arg1:T1 Arg2:T5
+```
+
 
 ## Main formats used in automatic coreference resolution
 
