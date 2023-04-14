@@ -166,7 +166,7 @@ def test_iter_tokens_as_dict_indices(corpus1: Corpus) -> None:
         assert actual[i]["index_of_token_in_the_text"] == token_in_text
 
 
-def test_iter_mentions_as_dict_indices(corpus1: Corpus) -> None:
+def test_iter_text_mentions_as_dict_indices(corpus1: Corpus) -> None:
     actual = list(corpus1.iter_text_mentions_as_dict())
     expected = [
         [0, 0, 2, 0, 3, 2, 0, 0, 1],
@@ -175,6 +175,7 @@ def test_iter_mentions_as_dict_indices(corpus1: Corpus) -> None:
         [0, 0, 0, 1, 0, 0, 0, 1, 0],
         [0, 2, 1, 1, 0, 0, 0, 1, 0],
         [0, 2, 4, 1, 5, 3, 0, 1, 2],
+        [0, 1, 2, 0, 1, 0, 0, 0, 1],
     ]
     for i in range(len(expected)):
         assert len(actual) == len(expected[i])
@@ -185,6 +186,7 @@ def test_iter_mentions_as_dict_indices(corpus1: Corpus) -> None:
         mention_in_sent,
         mention_in_par,
         mention_in_text,
+        mention_in_chain,
     ) in enumerate(zip(*expected)):
         assert actual[i]["index_of_paragraph_in_the_text"] == par_in_text
         assert actual[i]["index_of_sentence_in_the_paragraph"] == sent_in_par
@@ -192,6 +194,7 @@ def test_iter_mentions_as_dict_indices(corpus1: Corpus) -> None:
         assert actual[i]["index_of_mention_in_the_sentence"] == mention_in_sent
         assert actual[i]["index_of_mention_in_the_paragraph"] == mention_in_par
         assert actual[i]["index_of_mention_in_the_text"] == mention_in_text
+        assert actual[i]["index_of_mention_in_the_chain"] == mention_in_chain
 
 
 def test_iter_text_chains_as_dict_indices(corpus1: Corpus) -> None:
@@ -570,6 +573,7 @@ def test_get_dataframes(corpus1: Corpus) -> None:
         "length",
         "string",
         "token_count",
+        "index_of_mention_in_the_chain",
         "index_of_paragraph_in_the_text",
         "index_of_sentence_in_the_paragraph",
         "index_of_sentence_in_the_text",

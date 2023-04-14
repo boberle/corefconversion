@@ -483,7 +483,7 @@ class Corpus(Annotable):
         chain_id = 0
         for text_index, text in enumerate(self._texts):
             for chain in text.chains:
-                for mention in chain.mentions:
+                for index_of_mention_in_the_chain, mention in enumerate(chain.mentions):
                     data = dict(
                         id=mention_index,
                         chain_name=chain.name,
@@ -499,6 +499,7 @@ class Corpus(Annotable):
                         length=mention.end - mention.start + 1,
                         string=mention.string,
                         token_count=mention.token_count,
+                        index_of_mention_in_the_chain=index_of_mention_in_the_chain,
                         index_of_paragraph_in_the_text=paragraph_indices_in_text[
                             id(mention)
                         ],
