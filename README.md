@@ -221,7 +221,7 @@ Here is an extract:
 #end document
 
 
-#begin document (ceasar.sacr); part 000
+#begin document (caesar.sacr); part 000
 0	Gaius	(0
 1	Julius	-
 2	Caesar	0)
@@ -333,7 +333,7 @@ The command produced a series of files in the `testing_conll2sacr` directory:
 
 ```
 _aesop.sacr___part_000
-_ceasar.sacr___part_000
+_caesar.sacr___part_000
 _cicero.sacr___part_000
 _pliny.sacr___part_000
 _simple.sacr___part_000
