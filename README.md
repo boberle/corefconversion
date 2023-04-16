@@ -662,6 +662,9 @@ and draw a graph:
 
 ## Main formats used in automatic coreference resolution
 
+
+### CoNLL format
+
 The **CoNLL format** is a tabular format: each token is on a separate line and annotation for the token are on separate column.  Document boundaries are indicated by specific marks, and sentence separation by a white line.
 
 Here is an example:
@@ -689,6 +692,8 @@ Here is an example:
 Column separator (spaces or tabulation), number and content vary according to specification (CoNLL-2012, CoNLL-U, CoNLL-X, etc.).
 
 
+### Jsonlines format
+
 The **jsonlines format** stores data for several texts (a corpus).  Each line is a valid json document, as follows:
 
 ```
@@ -710,6 +715,34 @@ It is used for some coreference resolution systems, such as:
 - https://github.com/kentonl/e2e-coref (English)
 - https://github.com/kkjawz/coref-ee (English)
 - https://github.com/boberle/cofr (French)
+
+
+### Brat format
+
+Brat offers a standoff annotation format that stores both the text and the annotations.
+
+Here is an example of the annotations, usually saved in an `.ann` file:
+
+```
+T1      Person 0 9      A Peasant
+T2      Animal 16 43    an Eagle captured in a trap
+T3      Object 37 43    a trap
+T4      Animal 62 70    the bird
+R1      Coreference Arg1:T2 Arg2:T4
+T5      Person 76 79    him
+R2      Coreference Arg1:T1 Arg2:T5
+```
+
+The text file is just a plain text file (`.txt`).
+
+You can find more [here](https://brat.nlplab.org/standoff.html).
+
+
+### Glozz format
+
+Glozz is (was?) an annotation platform (on which you find more [here](http://www.glozz.org/)), that use a URS model (Units, Relations, Schemas, which correspond to Mentions, Relations, Chains).  Annotations are standoff, and are stored in two file: a text file (`.ac`) and an xml file (`.aa`). Here is an example of the xml:
+
+<img src="docs/imgs/glozz_annotation.png"/>
 
 
 ## License
