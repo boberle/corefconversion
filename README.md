@@ -463,6 +463,202 @@ T5      Person 76 79    him
 R2      Coreference Arg1:T1 Arg2:T5
 ```
 
+## Pandas Dataframes and relational databases with `Annotable`, `sacr2annotable.py` and `sacr2df.py`
+
+The `Annotable` class and its subclasses `Corpus`, `Text`, `Paragraph`, `Sentence`, `Token`, `Mention` and `Chain` are a great way to transform a corpus into a series of dataframes usable with Pandas.
+
+The script `sacr2annotable.py` is a parser of SACR files into a `Corpus` object that can be used to convert into dataframes or CSV files.
+
+The script `sacr2df.py` will take a series of SACR files as input, and output a zip file with CSV files, you can use it like this:
+
+```bash
+python3 sacr2df.py text1.sacr text2.sacr ... -o output_file.zip
+```
+
+You can also use it as a library, for example in a Jupyter notebook (see below for an example):
+
+```python
+from sacr2df import convert_sacr_files_to_dataframes
+from pathlib import Path
+
+dfs = convert_sacr_files_to_dataframes(
+    Path("testing/aesop.sacr"),
+    Path("testing/caesar.sacr"),
+    Path("testing/cicero.sacr"),
+    Path("testing/pliny.sacr"),
+)
+
+# then do something with the dfs:
+print(dfs.texts.head())
+print(dfs.paragraphs.head())
+print(dfs.sentences.head())
+print(dfs.tokens.head())
+print(dfs.text_chains.head())
+print(dfs.text_mentions.head())
+print(dfs.text_consecutive_relations.head())
+print(dfs.text_to_first_relations.head())
+```
+
+Each dataframe contains a series of columns containing index information (like the index of the mention in the chain), count information (chain size, token length), strings (the actual string of a mention or a token), metadata (properties for mentions, like part of speech or function, if they are annotated, metadata for texts, as anotated in the file), etc.  You will find the whole list below.
+
+For mentions, properties are added as columns of the dataframe or CSV file. For example, with a mention like this:
+
+```
+{chain1:partofspeech="noun",function="subject" John} ...
+```
+
+2 columns will be added to the dataframe/csv: `partofspeech` and `function`.
+
+You can add metadata to each text by adding them like this:
+
+```
+#textid:The Raven
+
+#textmetadata:type=literature
+#textmetadata:century=19
+#textmetadata:author=Edgar Poe
+
+Once upon a midnight dreary, while I pondered, weak and weary,
+Over many a quaint and curious volume of forgotten lore, 
+...
+```
+
+Here, the following columns will be added to the dataframe/csv of texts:
+
+- `text_name`, containing here "The Raven"
+- `type`, containing here "literature"
+- `century`, containing here "19"
+- `author`, containing here "Edgar Poe"
+
+You can add as many metadata as you want. If a text is missing a metadata, `None` will be recorded.
+
+The dataframes/csv files all have an index, which acts like an id. The dataframes are related by ids as in other relational database. For example, mentions have a `chain_id` column that match the row index of the `chains` dataframe/csv. This means that you can import the CSV files into an SQL relational database, for example.  You can also do join in dataframes. For example, if you want to associate the type of the text (literature, science, politics, etc., recorded as a text metadata) to each mentions, you will just perform a join:
+
+```python
+joined = dfs.text_mentions.join(dfs.texts, on="text_id", lsuffix="_mention")
+joined = joined[["chain_name", "function", "work"]]
+```
+
+You will got something like:
+
+```
+    chain_name  function     work
+0   Peasant     s subject    literature
+1   Peasant     o object     literature
+2   Peasant     o object     literature
+3   Peasant     o object     literature
+4   M18         a adverbial  science
+...
+```
+
+You can also use the CSV files to analyse the corpus with Excel. See an example [here, starting at slide 67](https://boberle.com/static/pres/publications/Oberle-2019_cardiff.pdf).
+
+### List of tables and columns:
+
+- texts, the following columns, plus metadata as described above:
+  - `name`
+  - `token_count`
+  - `sentence_count`
+  - `paragraph_count`
+  - `mention_count`
+  - `chain_count`
+- paragraphs:
+  - `text_id`
+  - `text_name`
+  - `token_count`
+  - `sentence_count`
+  - `mention_count`
+  - `index_of_paragraph_in_the_text`
+- sentences:
+  - paragraph_id`
+  - text_id`
+  - text_name`
+  - token_count`
+  - mention_count`
+  - index_of_paragraph_in_the_text`
+  - index_of_sentence_in_the_paragraph`
+  - index_of_sentence_in_the_text`
+- columns:
+  - `sentence_id`
+  - `paragraph_id`
+  - `text_id`
+  - `text_name`
+  - `start`
+  - `end`
+  - `length`
+  - `string`
+  - `index_of_paragraph_in_the_text`
+  - `index_of_sentence_in_the_paragraph`
+  - `index_of_sentence_in_the_text`
+  - `index_of_token_in_the_sentence`
+  - `index_of_token_in_the_paragraph`
+  - `index_of_token_in_the_text`
+- text mentions, the following columns + all the properties annotated in the SACR file for each mention:
+  - `chain_name`
+  - `chain_id`
+  - `sentence_id`
+  - `paragraph_id`
+  - `text_id`
+  - `text_name`
+  - `is_singleton`
+  - `chain_size`
+  - `start`
+  - `end`
+  - `length`
+  - `string`
+  - `token_count`
+  - `index_of_mention_in_the_chain`
+  - `index_of_paragraph_in_the_text`
+  - `index_of_sentence_in_the_paragraph`
+  - `index_of_sentence_in_the_text`
+  - `index_of_mention_in_the_sentence`
+  - `index_of_mention_in_the_paragraph`
+  - `index_of_mention_in_the_text`
+- chains:
+  - `text_id`
+  - `text_name`
+  - `name`
+  - `size`
+  - `index_of_chain_in_the_text`
+- relations. There are two tables: consecutive relation (A-B, B-C, C-D, etc.) and relation to the first mention in the chain (A-B, A-C, A-D, etc.):
+  - `chain_id`
+  - `chain_name`
+  - `text_id`
+  - `text_name`
+  - `m1_id`
+  - `m2_id`
+
+
+### Example of a notebook
+
+(Find the notebook [here](docs/sample_notebook.ipynb) or the html export [here](docs/sample_notebook.html))
+
+You will find a sample of a notebook in the `docs` directory. Here are some highlights:
+
+Once you have loaded the files and get the dataframes as described above, you can perform usual operations on dataframes, like selected some rows, as here to show singletons (chains of size of 1 mentions):
+
+<img src="docs/imgs/notebook_singletons.png"/>
+
+You can use matplotlib to easily draw graphs (or seaboarn, etc.), as here for the part of speech of chain first mentions:
+
+<img src="docs/imgs/notebook_part_of_speech_of_first_mentions.png"/>
+
+or the distribution of sentence lengths:
+
+<img src="docs/imgs/notebook_sentence_lengths.png"/>
+
+As mentioned earlier, you can use the dataframes like a relational database, and use the `join` (or `merge`) function of pandas, for example to add the type of work (literature, politics, science), recorded as text metadata, to each mention:
+
+<img src="docs/imgs/notebook_join.png"/>
+
+And then use a pivot table:
+
+<img src="docs/imgs/notebook_pivot.png"/>
+
+and draw a graph:
+
+<img src="docs/imgs/notebook_pivot_chart.png"/>
+
 
 ## Main formats used in automatic coreference resolution
 
