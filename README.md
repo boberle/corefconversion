@@ -768,6 +768,8 @@ Glozz is (was?) an annotation platform (on which you find more [here](http://www
 
 Newer additions are type-checked with `mypy` and tested with `pytest`. For example: `sacr_parser2.py`, `annotatble.py`, `sacr2ann.py` and `sacr2df.py`.
 
+`flake8` and `isort` are also used.  Use may want to run `make check-lint` or `make lint` to lint the code (older scripts are not affected, and are not type-checked nor linted).  `make test` will run the tests.
+
 
 ## <a name="license"></a> License
 
