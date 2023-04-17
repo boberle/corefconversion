@@ -1,3 +1,23 @@
+"""Convert a sacr file to an ann/txt files (BRAT standoff annotations).
+
+The script will produce two files, one for the text and one for the annotations.
+
+Annotations are of the form:
+
+    T1      Person 0 9      A Peasant
+    T2      Animal 16 43    an Eagle captured in a trap
+    T3      Object 37 43    a trap
+    T4      Animal 62 70    the bird
+    R1      Coreference Arg1:T2 Arg2:T4
+    T5      Person 76 79    him
+    R2      Coreference Arg1:T1 Arg2:T5
+
+Note that only a subset of the BRAT format is implemented for now, namely
+the text-bound annotations and the relations.
+
+Please consult the README file for more information.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -167,8 +187,7 @@ def convert(
 def parse_args() -> Namespace:
     parser = argparse.ArgumentParser(
         prog="sacr2ann",
-        description="convert a sacr file to an ann/txt files (BRAT standoff annotations)",
-        # description=__doc__,
+        description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("input", help="input file")

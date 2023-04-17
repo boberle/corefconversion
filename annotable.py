@@ -1,3 +1,8 @@
+"""Classes and functions to model a texts annotated with mentions and chains, and create dataframes from it.
+
+See the README file.
+"""
+
 import io
 from dataclasses import dataclass, field
 from pathlib import Path

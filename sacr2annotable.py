@@ -1,3 +1,23 @@
+"""Convert a corpus of SACR texts into a Corpus (from annotable.py) that can be
+used to output dataframes.
+
+It is a class which should be used as follows:
+
+files = [
+    Path("file1.sacr"),
+    Path("file2.sacr"),
+    Path("file3.sacr"),
+    # ...
+]
+
+converter = Sacr2AnnotableConverter()
+for file in files:
+    converter.convert_text(file)
+corpus = converter.corpus
+
+dataframes = corpus.get_dataframes()
+"""
+
 from __future__ import annotations
 
 import re
