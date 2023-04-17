@@ -1,9 +1,29 @@
 # Conversion Scripts for Coreference
 
-This repository contains conversion scripts for coreference.  The main formats we are dealing with here are described at the end of this document.
+This repository contains conversion scripts for coreference.
+
+Here is a "table of contents":
+
+- conversion between 2 formats:
+  - [jsonlines2text](#jsonlines2text)
+  - [jsonlines2conll](#jsonlines2conll)
+  - [conll2jsonlines](#conll2jsonlines)
+  - [sacr2conll](#sacr2conll)
+  - [conll2sacr](#conll2sacr)
+  - [text2jsonlines](#text2jsonlines)
+  - [jsonlines2tei](#jsonlines2tei)
+  - [sacr2ann](#sacr2ann)
+- analysis with Pandas/relational database and Matplotlib:
+  - [corpus of sacr files as dataframes and relational databases](#sacr2df)
+- tools and references:
+  - [functions for CoNLL](#conll-transform)
+  - [main formats used in coreference](#main-formats)
+- on the repository:
+  - [code quality](#quality)
+  - [license and contact](#license)
 
 
-## The `jsonlines2text.py` script
+## <a name="jsonlines2text"></a> The `jsonlines2text.py` script
 
 Script to convert from a jsonlines file to a text representation of coreference annotation.  The output is html.  Mentions are surrounded by brackets.  Coreference chains are represented by colors (each chain has a specific color) and, if requested by a switch, an index (1, 2, 3...).  Singletons may be hidden or shown in a specific color (gray by default), without any index.
 
@@ -63,7 +83,7 @@ python3 jsonlines2text.py testing/docs.jsonlines -i -o output.html -n 100
 ```
 
 
-## The `jsonlines2conll.py` script
+## <a name="jsonlines2conll"></a> The `jsonlines2conll.py` script
 
 Script to convert a jsonlines file to a CoNLL file.  Use the `-h` and `--help` switches to get detailed help on the options.
 
@@ -126,7 +146,7 @@ python3 jsonlines2conll.py -g testing/singe.jsonlines -o ouput.conll -c testing/
 ```
 
 
-## The `conll2jsonlines.py` script
+## <a name="conll2jsonlines"></a> The `conll2jsonlines.py` script
 
 Script to convert a conll formatted file to a jsonlines formatted file.  Use the `-h` and `--help` switches to get detailed help on the options.
 
@@ -186,7 +206,7 @@ Output sample:
 }
 ```
 
-## The `sacr2conll.py` script
+## <a name="sacr2conll"></a> The `sacr2conll.py` script
 
 Script to convert from the [SACR](https://boberle.com/projects/coreference-annotation-with-sacr/) format to a CONLL-2012-like format.  Note that the CONLL format which is produced:
 
@@ -309,7 +329,7 @@ python3 conll2jsonlines.py --token-col 1 --speaker-col 2 /tmp/lucian_speakers.co
 ```
 
 
-## The `conll2sacr.py` script
+## <a name="conll2sacr"></a> The `conll2sacr.py` script
 
 The opposite of `sacr2conll.py`.  It converts a CONLL-2012 or CONLL-X file into a [SACR](https://boberle.com/projects/coreference-annotation-with-sacr/) file.
 
@@ -344,7 +364,7 @@ Note that special characters (here the parentheses and spaces) have been replace
 Please refer to the `-h` option for a complete list of options.
 
 
-## `text2jsonlines.py`
+## <a name="text2jsonlines"></a> `text2jsonlines.py`
 
 Script to convert a plain text to a jsonlines format (used for example for [cofr](https://github.com/boberle/cofr)).
 
@@ -381,14 +401,14 @@ Example with the sentence "I eat an apple.":
 ```
 
 
-## `jsonlines2tei.py`
+## <a name="jsonlines2tei"></a> `jsonlines2tei.py`
 
 Script to convert the jsonlines format into a TEI-URS format used by softwares such as TXM.  See the [`jsonlines2tei` repository](https://github.com/boberle/jsonlines2tei).
 
 
-## Function library `conll_transform.py`
+## <a name="conll-transform"></a> Function library `conll_transform.py`
 
-Module containing several function to manipulate conll data:
+Module containing several functions to manipulate conll data:
 
 - `read_files`: Read one or several conll files and return a dictionary of documents.
 - `read_file`: Read a conll file and return dictionary of documents.
@@ -411,7 +431,7 @@ Module containing several function to manipulate conll data:
 - `merge_amalgams`: Add amalgams in documents from where they have been removed.
 
 
-## Convert SACR file to Brat Standoff Annotation using `sacr2ann.py`
+## <a name="sacr2ann"></a> Convert SACR file to Brat Standoff Annotation using `sacr2ann.py`
 
 The script `sacr2ann.py` will convert a SACR file to a set of 2 files used with BRAT:
 
@@ -463,7 +483,7 @@ T5      Person 76 79    him
 R2      Coreference Arg1:T1 Arg2:T5
 ```
 
-## Pandas Dataframes and relational databases with `Annotable`, `sacr2annotable.py` and `sacr2df.py`
+## <a name="sacr2df"></a> Pandas Dataframes and relational databases with `Annotable`, `sacr2annotable.py` and `sacr2df.py`
 
 The `Annotable` class and its subclasses `Corpus`, `Text`, `Paragraph`, `Sentence`, `Token`, `Mention` and `Chain` are a great way to transform a corpus into a series of dataframes usable with Pandas.
 
@@ -660,7 +680,7 @@ and draw a graph:
 <img src="docs/imgs/notebook_pivot_chart.png"/>
 
 
-## Main formats used in automatic coreference resolution
+## <a name="main-formats"></a> Main formats used in automatic coreference resolution
 
 
 ### CoNLL format
@@ -744,7 +764,11 @@ Glozz is (was?) an annotation platform (on which you find more [here](http://www
 
 <img src="docs/imgs/glozz_annotation.png"/>
 
+## <a name="quality"></a> Code quality
 
-## License
+Newer additions are type-checked with `mypy` and tested with `pytest`. For example: `sacr_parser2.py`, `annotatble.py`, `sacr2ann.py` and `sacr2df.py`.
+
+
+## <a name="license"></a> License
 
 All the scripts are distributed under the terms of the Mozilla Public Licence 2.0.
