@@ -5,14 +5,12 @@ This repository contains conversion scripts for coreference.
 Here is a "table of contents":
 
 - conversion between 2 formats:
-  - [jsonlines2text](#jsonlines2text)
-  - [jsonlines2conll](#jsonlines2conll)
-  - [conll2jsonlines](#conll2jsonlines)
-  - [sacr2conll](#sacr2conll)
-  - [conll2sacr](#conll2sacr)
-  - [text2jsonlines](#text2jsonlines)
-  - [jsonlines2tei](#jsonlines2tei)
+  - [jsonlines2conll](#jsonlines2conll) and [conll2jsonlines](#conll2jsonlines)
+  - [sacr2conll](#sacr2conll) and [conll2sacr](#conll2sacr)
+  - [text2jsonlines](#text2jsonlines) and [jsonlines2text](#jsonlines2text)
   - [sacr2ann](#sacr2ann)
+  - [sacr2glozz](#sacr2glozz) and [glozz2sacr](#glozz2sacr)
+  - [jsonlines2tei](#jsonlines2tei)
 - analysis with Pandas/relational database and Matplotlib:
   - [corpus of sacr files as dataframes and relational databases](#sacr2df)
 - tools and references:
@@ -678,6 +676,71 @@ And then use a pivot table:
 and draw a graph:
 
 <img src="docs/imgs/notebook_pivot_chart.png"/>
+
+
+## <a name="sacr2glozz"></a> Convert a SACR file to a pair of GLOZZ files
+
+The script `sacr2glozz.pl` is a Perl script to convert one SACR file to a pair of GLOZZ files, one `.ac` containing the text, and one `.aa` containing the annotations (in XML format).
+
+The basic usage is as follows:
+
+```bash
+perl sacr2glozz.pl file.sacr glozzfilename
+```
+
+where `glozzfilename` is the file name of the two GLOZZ files (the extensions `.ac` and `.aa` are added automatically).
+
+There are others options:
+
+```
+-m --min VALUE The minimum length of a chain.  If -e AND -p are set, then
+               the chains with less links have the value specified in -e.
+               Otherwise, they are excluded.
+               Default is 0 (all links are included).
+-e VALUE       Put VALUE in the the PROP_NAME property (if the -p option is
+               used) for chains with less than -m. (E.g. "" or "SI" for
+               SIngleton.)
+-p PROP_NAME   Include a property PROP_NAME with the name of the referent.
+               If empty string, don't use.
+-s --schema    Include schemata.
+-K             Don't keep comments.
+-e             Explode head property into 'headpos' and 'headstring'.
+-f REFNAME     Include only REFNAME (this option can be repeated).
+--model        Build a Glozz annotation model (.aam).
+--link-name VAL Name of the link (like 'link', 'mention', 'markable', etc.).
+               Default is 'MENTION'.
+```
+
+Because it's a Perl file, if you need any assistance, please send me a message!
+
+For this script to run, you will need to install `XML::Simple`. You can do it via CPAN, or if you are on a Debian based distro (like Ubuntu), then you can run `sudo apt install libxml-simple-perl`.
+
+
+## <a name="glozz2sacr"></a> Convert a pair of GLOZZ files to a SACR file
+
+The script `glozz2sacr.pl` is a Perl script to convert a pair of GLOZZ files, one `.ac` containing the text, and one `.aa` containing the annotations (in XML format) to a SACR file.
+
+The basic usage is as follows:
+
+```bash
+perl glozz2sacr.pl glozzfile.aa out.sacr
+```
+
+where `glozzfile.aa` is one file of the GLOZZ file (you could have given also the `.ac` file). This assumes that both GLOZZ files (`.ac` and `.aa` have the same base name, for example `abc.aa` and `abc.ac`).
+
+There are others options:
+
+```
+--ref-field    Name of the field where the referent is store (REF, refname,
+               etc.). Default is REF.
+--unit-type    Type of the unit (maillon, MENTION, etc.). Default is MENTION.
+--reset        Get a new name for referent (useful if the name used in the
+               glozz file contains non standard characters).
+```
+
+Because it's a Perl file, if you need any assistance, please send me a message!
+
+For this script to run, you will need to install `XML::Simple`. You can do it via CPAN, or if you are on a Debian based distro (like Ubuntu), then you can run `sudo apt install libxml-simple-perl`.
 
 
 ## <a name="main-formats"></a> Main formats used in automatic coreference resolution
