@@ -429,6 +429,22 @@ Module containing several functions to manipulate conll data:
 - `merge_amalgams`: Add amalgams in documents from where they have been removed.
 
 
+This module is available on PyPI. To download it:
+
+```bash
+pip3 install conll-transform
+```
+
+To use it, just import the functions from `conll_transform`, for example:
+
+```python
+from conll_transform import read_files
+
+documents = read_files("myfile.conll", "myfile2.conll")
+print(documents)
+```
+
+
 ## <a name="sacr2ann"></a> Convert SACR file to Brat Standoff Annotation using `sacr2ann.py`
 
 The script `sacr2ann.py` will convert a SACR file to a set of 2 files used with BRAT:
